@@ -57,9 +57,11 @@ void printTrie(Node* root, char *str){
 void printTrie_reversed(Node* root, char *str){
     if(root == NULL) return;
     str[root->pos] = root->letter;
-    for (int i = NUM_LETTERS-1 ; i >= 0; i--){
+    // first, call to printTrie_reversed recursive from the end(descending Lexicographic order) 
+    for (int i = NUM_LETTERS-1 ; i >= 0; i--){ 
         printTrie_reversed(root->children[i], str); 
     }  
+    // new print all words from after all the recursive calls
     if(root->ends){
         str[root->pos + 1] = 0;
         printf("%s %d\n", str, root->ends);
@@ -68,10 +70,10 @@ void printTrie_reversed(Node* root, char *str){
 
 void freeTrie(Node* root){//Free memory of trie
     if(root == NULL) return;
-    for (int i = 0; i < NUM_LETTERS; i++){
+    for (int i = 0; i < NUM_LETTERS; i++){ // pass all the childern of root
         freeTrie(root->children[i]);
     }
-    free(root);
+    free(root); // after all recursive calls, we free all the children and root itself
 }
 int main(int argc, char const *argv[])
 {
