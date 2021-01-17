@@ -4,7 +4,7 @@ FLAGS = -Wall
 all: frequency 
 
 frequency: frequency.c
-	$(CC) $(FLAGS)  -o frequency frequency.c 
+	$(CC) $(FLAGS) frequency.c -o frequency
 
 .PHONY: clean
 
