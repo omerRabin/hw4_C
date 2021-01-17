@@ -43,14 +43,14 @@ void addWord(Node* root, char* s){
 //--------printTrie print the Trie in ascending Lexicographic order
 void printTrie(Node* root, char *str){
     if(root == NULL) return; // we finish pass the Trie
-    str[root->pos] = root->letter; // Copies back the letters from Trie into str pointer by the original positions of the letters in str
+    str[root->pos] = root->letter; // Copies the letter from current node into str pointer by the original position of the letter in str
     if(root->ends){ // if in this node there is words that ends
         str[root->pos + 1] = 0; // put \0 in the end of the str
         printf("%s %d\n", str, root->ends);
     }
-    for (int i = 0; i < NUM_LETTERS; i++){ // calling the loop to printTrie each loop is for a specific word
+    for (int i = 0; i < NUM_LETTERS; i++){ 
         printTrie(root->children[i], str); // call recursive to printTrie, root->children[i] is the next node by ascending Lexicographic order
-        //and str is the temporary pointer to the word
+        //and str is the temporary pointer to the words
     }  
 }
 //----------printTrie_reversed print the Trie in descending Lexicographic order 
@@ -73,7 +73,6 @@ void freeTrie(Node* root){//Free memory of trie
     }
     free(root);
 }
-
 int main(int argc, char const *argv[])
 {
     //------------------------------- create the Trie
