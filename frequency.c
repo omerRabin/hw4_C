@@ -7,7 +7,7 @@
 
 typedef struct Node{
     char letter; // The letter go into the node
-    int ends;  // count the num of words that ends in this node
+    int wordsCount;  // count the num of words that ends in this node
     struct Node* children[NUM_LETTERS]; // an array to all the children of node
     int pos; // save the index of the letter in its word
 } Node;
@@ -35,7 +35,7 @@ void addWord(Node* root, char* s){
         s++; // increse s pointer to the next character
         i++; // inscrese the index of s pointer
         if(!*s){ // if we finish to read str
-            root->ends++; // increse ends
+            root->wordsCount++; // increse ends
             root->pos = i; // save the index of the char
         }
     }
@@ -44,9 +44,9 @@ void addWord(Node* root, char* s){
 void printTrie(Node* root, char *str){
     if(root == NULL) return; // we finish pass the Trie
     str[root->pos] = root->letter; // Copies the letter from current node into str pointer by the original position of the letter in str
-    if(root->ends){ // if in this node there is words that ends
+    if(root->wordsCount){ // if in this node there is words that ends
         str[root->pos + 1] = 0; // put \0 in the end of the str
-        printf("%s %d\n", str, root->ends);
+        printf("%s %d\n", str, root->wordsCount);
     }
     for (int i = 0; i < NUM_LETTERS; i++){ 
         printTrie(root->children[i], str); // call recursive to printTrie, root->children[i] is the next node by ascending Lexicographic order
@@ -62,9 +62,9 @@ void printTrie_reversed(Node* root, char *str){
         printTrie_reversed(root->children[i], str); 
     }  
     // new print all words from after all the recursive calls
-    if(root->ends){
+    if(root->wordsCount){
         str[root->pos + 1] = 0;
-        printf("%s %d\n", str, root->ends);
+        printf("%s %d\n", str, root->wordsCount);
     }
 }
 
