@@ -1,119 +1,128 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define NUM_LETTERS 26
-
-typedef struct Node{
+typedef struct node{
     char letter; // The letter go into the node
     int wordsCount;  // count the num of words that ends in this node
-    struct Node* children[NUM_LETTERS]; // an array to all the children of node
-    int pos; // save the index of the letter in its word
-} Node;
+    struct node* children[NUM_LETTERS]; // an array to all the children of node
+    int index; // save the index of the letter in its word
+} node;
 
-//----------newNode assign memory to the new node and insert a letter to p-> letter
-Node* newNode(char c){
-    Node* p = (Node*)malloc(sizeof(Node));
-    if(p == NULL) {
+
+//----------createNode assign memory to the new node and insert a letter to p-> letter
+node* createNode(char c){
+    node* n = (node*)malloc(sizeof(node));
+    if(n == NULL) {
         printf("No memory for create new node");
         exit(1);
     }
-    p->letter = c; // insert the letter
-    return p;
+    n->letter = c; // insert the letter
+    return n;
 }
-//------------ addWord pass the Trie and add the word to the Trie
-void addWord(Node* root, char* s){
-    int i = -1;
-    while(*s){
-        char current = tolower(*s);
-        if(root->children[current-'a'] == NULL){ // if we now in a new word that was not exist before 
-            root->children[current-'a'] = newNode(current); // define new node
-            root->pos = i; // update the pos of current node to be the index of the letter in s (parameter)
-        }
-        root = root->children[current-'a']; // continue to the next node in the trie according to next char in s
-        s++; // increse s pointer to the next character
-        i++; // inscrese the index of s pointer
-        if(!*s){ // if we finish to read str
-            root->wordsCount++; // increse ends
-            root->pos = i; // save the index of the char
-        }
-    }
-}
-//--------printTrie print the Trie in ascending Lexicographic order
-void printTrie(Node* root, char *str){
-    if(root == NULL) return; // we finish pass the Trie
-    str[root->pos] = root->letter; // Copies the letter from current node into str pointer by the original position of the letter in str
-    if(root->wordsCount){ // if in this node there is words that ends
-        str[root->pos + 1] = 0; // put \0 in the end of the str
-        printf("%s %d\n", str, root->wordsCount);
+
+//--------TriePrinter print the Trie in ascending Lexicographic order
+void TriePrinter(node* head, char *str){
+    if(head == NULL) return; // we finish pass the Trie
+    int originalIndex = head->index;
+    int numOfWords = head->wordsCount;
+    str[originalIndex] = head->letter; // Copies the letter from current node into str pointer by the original position of the letter in str
+    if(numOfWords){ // if in this node there is words that ends
+        str[originalIndex + 1] = 0; // put \0 in the end of the str
+        printf("%s %d\n", str, numOfWords);
     }
     for (int i = 0; i < NUM_LETTERS; i++){ 
-        printTrie(root->children[i], str); // call recursive to printTrie, root->children[i] is the next node by ascending Lexicographic order
-        //and str is the temporary pointer to the words
+        TriePrinter(head->children[i], str); // call recursive to TriePrinter, head->children[i] is the next node by ascending Lexicographic order
+        //and str is the temp pointer to the words
     }  
 }
-//----------printTrie_reversed print the Trie in descending Lexicographic order 
-void printTrie_reversed(Node* root, char *str){
-    if(root == NULL) return;
-    str[root->pos] = root->letter;
-    // first, call to printTrie_reversed recursive from the end(descending Lexicographic order) 
+
+//----------TriePrinterInReverse print the Trie in descending Lexicographic order 
+void TriePrinterInReverse(node* head, char *str){
+    if(head == NULL) return;
+    int originalIndex =head->index;
+    str[originalIndex] = head->letter;
+    // first, call to TriePrinterInReverse recursive from the end(descending Lexicographic order) 
     for (int i = NUM_LETTERS-1 ; i >= 0; i--){ 
-        printTrie_reversed(root->children[i], str); 
+        TriePrinterInReverse(head->children[i], str); 
     }  
     // new print all words from after all the recursive calls
-    if(root->wordsCount){
-        str[root->pos + 1] = 0;
-        printf("%s %d\n", str, root->wordsCount);
+    if(head->wordsCount){
+        str[originalIndex + 1] = 0;
+        printf("%s %d\n", str, head->wordsCount);
     }
 }
 
-void freeTrie(Node* root){//Free memory of trie
-    if(root == NULL) return;
-    for (int i = 0; i < NUM_LETTERS; i++){ // pass all the childern of root
-        freeTrie(root->children[i]);
+//------------ addWord pass the Trie and add the word to the Trie
+void addWord(node* head, char* word){
+    int index = -1;
+    while(*word!=0){
+        char current = tolower(*word);
+        if(head->children[current-'a'] == NULL){ // if we now in a new word that was not exist before 
+            head->children[current-'a'] = createNode(current); // define new node
+            head->index = index; // update the index of current node to be the index of the letter in s (parameter)
+        }
+        index++; // inscrese the index of s pointer
+        word++; // increse s pointer to the next character
+        head = head->children[current-'a']; // continue to the next node in the trie according to next char in s
+        if(!*word){ // if we finish to read str
+            head->wordsCount++; // increse ends
+            head->index = index; // save the index of the char
+        }
     }
-    free(root); // after all recursive calls, we free all the children and root itself
+}
+void freeTrie(node* head){//Free memory of trie
+    if(head == NULL) return;
+    for (int i = 0; i < NUM_LETTERS; i++){ // pass all the childern of head
+        freeTrie(head->children[i]);
+    }
+    free(head); // after all recursive calls, we free all the children and head itself
 }
 int main(int argc, char const *argv[])
 {
     //------------------------------- create the Trie
-    Node* root = newNode(0); // initialize root to NULL (by aaski value 0)
+    node* head = createNode(0); // initialize head to NULL (by aaski value 0)
     int i = 0;
-    char *str = (char*)malloc(1); // initialize with one place in memory for \0
+    char *str = (char*)malloc(1); // initialize str for storage the input 
+    if(str == NULL){
+        printf("There is no memory for malloc str");
+        return 1;
+    }
     while(1)
     {
-        char c = getchar();
-        if(isspace(c) || c == EOF){
+        char ch = getchar(); 
+        if(ch == EOF || isspace(ch)){
             str = realloc(str, i+1); // add one place in memory for \0
             if(str == NULL){
                 printf("realloc error");
                 return 1;
             }
             str[i] = 0; //add \0 to the end of the string
-            addWord(root, str);
+            addWord(head, str);
             i=0;
 
-            if(c == EOF) break;
+            if(ch == EOF) break;
         }
-        else if(isalpha(c)){ // check if the char is alphabet or not
-            c = tolower(c); // convert the char to be lower in case its not
+        else if(isalpha(ch)){ // check if the char is alphabet or not
+            ch = tolower(ch); // convert the char to be lower in case its not
             str = realloc(str, i+1); // add one place in memory for the new char
             if(str == NULL){
                 printf("realloc error");
                 return 1;
             }
-            str[i] = c;
+            str[i] = ch;
             i++;
         }
     }
 //-------------------------------------
     if(argc == 1)
-        printTrie(root, str);
-    else if(argc == 2 && strcmp(argv[1],"r")==0) 
-        printTrie_reversed(root, str);
+        TriePrinter(head, str);
+    else if(argc == 2 && strcmp(argv[1],"r")==0)
+        TriePrinterInReverse(head, str);
     // free memory
     free(str);
-    freeTrie(root);
+    freeTrie(head);
     return 0;
 }
